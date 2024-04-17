@@ -1,0 +1,172 @@
+{%extends "layout.html" %}
+{% block title %}Product | {{product_data.name}}{% endblock %}
+{% block content %} 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $.post(
+            '/status',
+            function(response){
+                location.href = '/inactive'
+            }
+        );
+    });
+</script>
+    <script>
+        function addToRelatedCart(product_id, quantity) {
+            $.post(
+                '/addToCart',
+                { product_id: product_id, quantity: quantity }, 
+                function(response) {
+                    $("#modalBody").html(response);
+                    $("#myModal").modal('show');
+                    $.post(
+                        '/userCartAddedItems',
+                        function(response)
+                        {
+                            console.log(response);
+                            $("#user-cart-items").html(response.total_rows);
+                        }
+                    );
+                }
+            );
+        }
+        function addRelatedFavorite(product_id)
+        {
+            $.post(
+                '/addFavorite',
+                'product_id='+product_id,
+                function(response){
+                    console.log(response);
+                    $("#modalBody").html(response);
+                    $("#myModal").modal('show');
+                }
+            );
+        }
+        function addToCart(product_id) {
+            var quantity = $("#var-value").text();
+            $.post(
+                '/addToCart',
+                { product_id: product_id, quantity: quantity }, 
+                function(response) {
+                    $("#modalBody").html(response);
+                    $("#myModal").modal('show');
+                    $.post(
+                        '/userCartAddedItems',
+                        function(response)
+                        {
+                            console.log(response);
+                            $("#user-cart-items").html(response.total_rows);
+                        }
+                    );
+                }
+            );
+        }
+        
+    </script>
+    <!-- Open Content -->
+    <section class="bg-light">
+        <div class="container pb-5">
+            <div class="row">
+                <div class="col-lg-5 mt-5">
+                    <div class="card mb-3">
+                        <img class="card-img img-fluid" src="/static/uploads/{{product_data.thumbnail}}" alt="Card image cap" id="product-detail">
+                    </div>
+                </div>
+                <!-- col end -->
+                
+                            </p>
+
+                            <h6>Description:</h6>
+                            <p>{{product_data.description}}</p>
+                            <input type="hidden" name="product-title" value="Activewear">
+                            <div class="row">
+                                <div class="col-auto">
+                                    <ul class="list-inline pb-3">
+                                        <li class="list-inline-item text-right">
+                                            Quantity
+                                            <input type="hidden" name="product-quanity" id="product-quanity" value="1">
+                                        </li>
+                                        <li class="list-inline-item"><span class="btn btn-success" id="btn-minus">-</span></li>
+                                        <li class="list-inline-item"><span class="badge bg-secondary" id="var-value">1</span></li>
+                                        <li class="list-inline-item"><span class="btn btn-success" id="btn-plus">+</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="row pb-3">
+                                <div class="col d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg" onclick="addToCart({{product_data.id}})">Add To Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Close Content -->
+
+    <!-- Start Article -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row text-left p-2 pb-3">
+                <h4>Related Products</h4>
+            </div>
+
+            <!--Start Carousel Wrapper-->
+            <div id="carousel-related-product" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for related_product in related_products %}
+                        {% if loop.index % 4 == 1 %}
+                            <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
+                                <div class="row">
+                        {% endif %}
+                        <div class="col-md-3">
+                            <div class="p-2 pb-3">
+                                <!-- Product content here -->
+                                <!-- Product content here -->
+                            <div class="product-wap card rounded-0">
+                                <div class="card rounded-0">
+                                    <img class="card-img rounded-0 img-fluid" src="/static/uploads/{{related_product.thumbnail}}">
+                                    <div class="card-img-overlay rounded-0 product-overlay d-flex align-items-center justify-content-center">
+                                        <ul class="list-unstyled">
+                                            <li><a class="btn btn-success text-white" onclick="addRelatedFavorite({{related_product.id}})"><i class="far fa-heart"></i></a></li>
+                                            <li><a class="btn btn-success text-white mt-2" onclick="addToRelatedCart({{related_product.id}},1)"><i class="fas fa-cart-plus"></i></a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            </div>
+                        </div>
+                        {% if loop.index % 4 == 0 or loop.last %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div> <br/>
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4"><a href="/category/{{product_data.category_id}}"  class="btn btn-success btn-lg" style="margin:auto;display:block;">View More</a></div>
+                <div class="col-md-4"></div>
+            </div>
+        </div>
+    </section>
+    <!-- End Article -->
+    
+    <!-- Modal -->
+    <div class="modal" id="myModal">
+        <div class="modal-dialog modal-sm bg-primary">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title">Alert</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" style="font-size:13px;"></button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+            </div>          
+        </div>
+    </div>
+    <!-- Modal -->
+    
+{% endblock %}
